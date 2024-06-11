@@ -1,0 +1,49 @@
+import paramiko
+import subprocess
+import logging
+import os
+from datetime import datetime
+
+
+logging.basicConfig(filename='backup.log', level=logging.INFO,
+                    format='%(asctime)s - %(levelname)s - %(message)s')
+
+
+LOCAL_DIRECTORY = '/path/to/local/directory'
+REMOTE_DIRECTORY = '/path/to/remote/directory'
+REMOTE_HOST = 'remote.server.com'
+REMOTE_USER = 'username'
+REMOTE_PORT = 22
+PRIVATE_KEY_PATH = '/path/to/private/key'
+
+def log_message(message):
+    logging.info(message)
+    print(message)
+
+def backup_directory():
+    try:
+        rsync_command = [
+            'rsync', '-avz', '-e',
+            f'ssh -i {PRIVATE_KEY_PATH} -p {REMOTE_PORT}',
+            LOCAL_DIRECTORY,
+            f'{REMOTE_USER}@{REMOTE_HOST}:{REMOTE_DIRECTORY}'
+        ]
+
+        result = subprocess.run(rsync_command, capture_output=True, text=True)
+        if result.returncode == 0:
+            log_message(f"Backup succeeded: {result.stdout}")
+        else:
+            log_message(f"Backup failed: {result.stderr}")
+
+    except Exception as e:
+        log_message(f"Backup failed: {str(e)}")
+
+def main():
+    backup_directory()
+
+if __name__ == "__main__":
+    main()
+
+SCRIPT:
+python automated_backup.py
+
